@@ -3,8 +3,6 @@ const unstopProblemDB = db.unstopProblem;
 
 exports.getSeatNumbers = async (req, res) => {
 
-    console.log("API hit ")
-
     const totalSeats = 80
     const seatsPerRow = 8
 
@@ -27,16 +25,116 @@ exports.getSeatNumbers = async (req, res) => {
 
     const seatsBooked = await unstopProblemDB.count();
 
+    //If seats required are not available
     if ((totalSeats - seatsBooked) < seats) {
         res.status(400).json(`only ${totalSeats - seatsBooked} seats are available`)
         return;
     }
 
+    //Finding All Seats That are Not available
     let seatsUnavailable = await unstopProblemDB.findAll({ attributes: ['seatNo'], raw: true });
 
     seatsUnavailable = seatsUnavailable.map(seat => {
         return seat.seatNo;
     })
+
+    //creating a object that gives us the value of seats available in a row
+
+    //example:if no seats are booked
+
+    // {
+    //     '1-7': [
+    //       1, 2, 3, 4,
+    //       5, 6, 7
+    //     ],
+    //     '8-14': [
+    //        8,  9, 10, 11,
+    //       12, 13, 14
+    //     ],
+    //     '15-21': [
+    //       15, 16, 17, 18,
+    //       19, 20, 21
+    //     ],
+    //     '22-28': [
+    //       22, 23, 24, 25,
+    //       26, 27, 28
+    //     ],
+    //     '29-35': [
+    //       29, 30, 31, 32,
+    //       33, 34, 35
+    //     ],
+    //     '36-42': [
+    //       36, 37, 38, 39,
+    //       40, 41, 42
+    //     ],
+    //     '43-49': [
+    //       43, 44, 45, 46,
+    //       47, 48, 49
+    //     ],
+    //     '50-56': [
+    //       50, 51, 52, 53,
+    //       54, 55, 56
+    //     ],
+    //     '57-63': [
+    //       57, 58, 59, 60,
+    //       61, 62, 63
+    //     ],
+    //     '64-70': [
+    //       64, 65, 66, 67,
+    //       68, 69, 70
+    //     ],
+    //     '71-77': [
+    //       71, 72, 73, 74,
+    //       75, 76, 77
+    //     ],
+    //     '78-80': [ 78, 79, 80 ]
+    //   }
+    
+    // if seats 1-5  are booked
+
+    // {
+    //     '1-7': [ 6, 7 ],
+    //     '8-14': [
+    //        8,  9, 10, 11,
+    //       12, 13, 14
+    //     ],
+    //     '15-21': [
+    //       15, 16, 17, 18,
+    //       19, 20, 21
+    //     ],
+    //     '22-28': [
+    //       22, 23, 24, 25,
+    //       26, 27, 28
+    //     ],
+    //     '29-35': [
+    //       29, 30, 31, 32,
+    //       33, 34, 35
+    //     ],
+    //     '36-42': [
+    //       36, 37, 38, 39,
+    //       40, 41, 42
+    //     ],
+    //     '43-49': [
+    //       43, 44, 45, 46,
+    //       47, 48, 49
+    //     ],
+    //     '50-56': [
+    //       50, 51, 52, 53,
+    //       54, 55, 56
+    //     ],
+    //     '57-63': [
+    //       57, 58, 59, 60,
+    //       61, 62, 63
+    //     ],
+    //     '64-70': [
+    //       64, 65, 66, 67,
+    //       68, 69, 70
+    //     ],
+    //     '71-77': [
+    //       71, 72, 73, 74,
+    //       75, 76, 77
+    //     ],
+    //     '78-80': [ 78, 79, 80 ]}
 
     const seatsGrouped = {};
 
@@ -62,9 +160,31 @@ exports.getSeatNumbers = async (req, res) => {
         }
     }
 
-    console.log(seatsGrouped, "seats grouped")
-
     let exactMatchFound = "";
+    //To get an Array of seats available from seatsGroup Object
+    // example if no seats are booked
+    // [
+    //     1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
+    //    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    //    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+    //    37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+    //    49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+    //    61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
+    //    73, 74, 75, 76, 77, 78, 79, 80
+    //  ]
+
+
+    // example if seats 1-5  are booked
+    // [
+    //     6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
+    //    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+    //    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+    //    42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+    //    54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65,
+    //    66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+    //    78, 79, 80
+    //  ] 
+
 
     let availableSeatsArr = []
 
@@ -77,7 +197,6 @@ exports.getSeatNumbers = async (req, res) => {
         }
     })
 
-    console.log(availableSeatsArr, "available seats arr")
 
     const objToCreate = []
 

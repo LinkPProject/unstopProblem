@@ -17,22 +17,16 @@ const UnstopProblem = () => {
 
             })
 
-            console.log("reaching 1")
-
             setResponseFromApi(responseFromAPI.data)
-            console.log("reaching 2")
 
         } catch (err) {
-            console.log(err, "error Catched")
+            setResponseFromApi([])
             setApiError(err.response.data)
-
-            console.log(err.response.data)
-            console.log(apiError, "API Error")
         }
     };
     return (
         <>
-            <div class="flex items-center justify-center mt mx-10">
+            <div class="flex items-center justify-center mt mx-10 mt-20">
                 <form class="w-full max-w-lg">
                     <div class="flex flex-wrap -mx-3 mb-6">
                         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
